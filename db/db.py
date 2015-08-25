@@ -15,7 +15,7 @@ from collections import defaultdict
 
 import pandas as pd
 from prettytable import PrettyTable
-import pybars 
+import pybars
 
 from .queries import mysql as mysql_templates
 from .queries import postgres as postgres_templates
@@ -371,11 +371,11 @@ class Table(object):
         Examples
         --------
         >>> from db import DemoDB
-        >>> db = DemoDB()       
+        >>> db = DemoDB()
         >>> db.tables.Track.select("Name")[:1].Name
         0    For Those About To Rock (We Salute You)
         Name: Name, dtype: object
-        
+
         # select name from the Track table
         db.tables.Track.select("Name")
                                                            Name
@@ -415,13 +415,13 @@ class Table(object):
         --------
         >>> from db import DemoDB
         >>> db = DemoDB()
-        
-        
+
+
         >>> db.tables.Track.count
         3503
-        
+
         -= Not in doctest as output is hard to predict
-        # select name from the Track table        
+        # select name from the Track table
         db.tables.Track.head()
            TrackId                                     Name  AlbumId  MediaTypeId  \
         0        1  For Those About To Rock (We Salute You)        1            1
@@ -446,7 +446,7 @@ class Table(object):
         3   4331779       0.99
         4   6290521       0.99
         5   6713451       0.99
-        
+
         db.tables.Track.head(1)
            TrackId                                     Name  AlbumId  MediaTypeId  \
         0        1  For Those About To Rock (We Salute You)        1            1
@@ -560,7 +560,7 @@ class Table(object):
         --------
         from db import DemoDB
         db = DemoDB()
-        Not in doctest : can't predict sample        
+        Not in doctest : can't predict sample
         db.tables.Track.sample(10)
            TrackId                                               Name  AlbumId  \
         0      274                                      Samba Makossa       25
@@ -812,7 +812,7 @@ class DB(object):
     Examples
     --------
     db = DB(dbname="AdventureWorks2012", dbtype="mssql", driver="{FreeTDS}")
-        
+
     from db import DB
     try:
         __import__('imp').find_module('psycopg2')
@@ -911,18 +911,19 @@ class DB(object):
                 raise Exception("Couldn't find pyodbc or pymssql libraries. Please ensure one of them is installed")
 
             if HAS_ODBC:
-                base_con = "Driver={driver};Server={server};Database={database};".format(
-                    driver=self.driver or "SQL Server",
-                    server=self.hostname or "localhost",
-                    database=self.dbname or ''
-                )
-                conn_str = ((self.username and self.password) and "{}{}".format(
-                    base_con,
-                    "User Id={username};Password={password};".format(
-                        username=self.username,
-                        password=self.password
-                    )
-                ) or "{}{}".format(base_con, "Trusted_Connection=Yes;"))
+                #base_con = "Driver={driver};Server={server};Database={database};".format(
+                #    driver=self.driver or "SQL Server",
+                #    server=self.hostname or "localhost",
+                #    database=self.dbname or ''
+                #)
+                #conn_str = ((self.username and self.password) and "{}{}".format(
+                #    base_con,
+                #    "User Id={username};Password={password};".format(
+                #        username=self.username,
+                #        password=self.password
+                #    )
+                #) or "{}{}".format(base_con, "Trusted_Connection=Yes;"))
+                conn_str = '''DSN=%s;UID=%s;PWD=%s''' % (self.hostname, self.username, self.password)
 
                 try:
                     self.con = pyo.connect(conn_str)
@@ -1014,7 +1015,7 @@ class DB(object):
         db = DB(username="hank", password="foo", hostname="staging.mardukas.com", dbname="bar", dbtype="mysql")
         db.save_credentials(profile="staging")
         db = DB(profile="staging")
-        
+
         >>> from db import DemoDB
         >>> db = DemoDB()
         >>> db.save_credentials(profile='test')
@@ -1112,8 +1113,8 @@ class DB(object):
         3
         >>> len(db.find_column("*e*", data_type=["NVARCHAR(70)", "INTEGER"]).columns)
         17
-            
-        -= Should sort in some way for all those doctests to be viable... 
+
+        -= Should sort in some way for all those doctests to be viable...
         -= if not, there's always a random issue where rows are not in the same order, making doctest fail.
         db.find_column("Name") # returns all columns named "Name"
         +-----------+-------------+---------------+
@@ -1165,7 +1166,7 @@ class DB(object):
         | Customer |    Address     | NVARCHAR(70) |
         | Employee |    Address     | NVARCHAR(70) |
         | Invoice  | BillingAddress | NVARCHAR(70) |
-        +----------+----------------+--------------+                
+        +----------+----------------+--------------+
         db.find_column("*e*", data_type=["NVARCHAR(70)", "INTEGER"]) # returns all columns have an "e" and are NVARCHAR(70)S or INTEGERS
         +-------------+----------------+--------------+
         | Table       |  Column Name   | Type         |
@@ -1213,13 +1214,13 @@ class DB(object):
             if limit:
                 q = "select top {limit} * from ({q}) q".format(limit=limit, q=q)
             return q
-    
+
     def _apply_handlebars(self, q, data, union=True):
         if (sys.version_info < (3, 0)):
             q = unicode(q)
         template = self.handlebars.compile(q)
         if isinstance(data, list):
-            query = [template(item) for item in data] 
+            query = [template(item) for item in data]
             query = [str(item) for item in query]
             if union==True:
                 query = "\nUNION ALL".join(query)
@@ -1253,7 +1254,7 @@ class DB(object):
         --------
         >>> from db import DemoDB
         >>> db = DemoDB()
-        
+
         db.query("select * from Track").head(2)
            TrackId                                     Name  AlbumId  MediaTypeId  \\\r
         0        1  For Those About To Rock (We Salute You)        1            1
@@ -1266,7 +1267,7 @@ class DB(object):
            UnitPrice
         0       0.99
         1       0.99
-        
+
         db.query("select * from Track", limit=10)
            TrackId                                     Name  AlbumId  MediaTypeId  \
         0        1  For Those About To Rock (We Salute You)        1            1
@@ -1316,7 +1317,7 @@ class DB(object):
         ... '''
         >>> len(db.query(q))
         3503
-        
+
         db.query(q, limit=10)
                                            Title  \
         0  For Those About To Rock We Salute You
@@ -1341,7 +1342,7 @@ class DB(object):
         7                         Inject The Venom       0.99
         8                               Snowballed       0.99
         9                               Evil Walks       0.99
-        
+
         >>> template = '''
         ...    SELECT
         ...    '{{ name }}' as table_name,
@@ -1356,8 +1357,8 @@ class DB(object):
         ...    {"name": "Artist"},
         ...    {"name": "Track"}
         ... ]
-        >>> 
-        
+        >>>
+
         db.query(q, data=data)
           table_name   cnt
         0      Album   347
@@ -1379,7 +1380,7 @@ class DB(object):
         >>> data = {"cols": ["AlbumId", "Title", "ArtistId"]}
         >>> len(db.query(q, data=data, union=False))
         347
-        
+
         db.query(q, data=data, union=False)
            AlbumId                                  Title  ArtistId
         0        1  For Those About To Rock We Salute You         1
@@ -1432,8 +1433,8 @@ class DB(object):
         109
         >>> len(db.query_from_file("db/tests/myscript.sql", limit=10))
         10
-               
-        
+
+
         db.query_from_file("db/tests/myscript.sql", limit=10)
                                            Title  \
         0  For Those About To Rock We Salute You
@@ -1583,6 +1584,7 @@ class DB(object):
 
         tables = {}
         # generate our Columns, and attach to each table to the table name in dict
+        print cols
         for (table_schema, table_name, column_name, data_type) in cols:
             if table_name not in tables:
                 tables[table_name] = []
@@ -1644,7 +1646,7 @@ class DB(object):
             from boto.s3.connection import Location
 
             # if boto is present, set the bucket_location to default.
-            # we can't do this in the function definition because we're 
+            # we can't do this in the function definition because we're
             # lazily importing boto only if necessary here.
             if bucket_location is None:
                 bucket_location = Location.DEFAULT
@@ -1764,7 +1766,7 @@ def list_profiles():
     Examples
     --------
     No doctest, covered by unittest
-    
+
     list_profiles()
     {'demo': {u'dbname': None,
       u'dbtype': u'sqlite',
@@ -1797,8 +1799,8 @@ def list_profiles():
 
 def remove_profile(name, s3=False):
     """
-    Removes a profile from your config   
-    
+    Removes a profile from your config
+
     """
     user = os.path.expanduser("~")
     if s3:
