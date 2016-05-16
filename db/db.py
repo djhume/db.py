@@ -2,7 +2,7 @@ import threading
 import glob
 import gzip
 try:
-    from StringIO import StringIO  # Python 2.7
+    from io import StringIO  # Python 2.7
 except:
     from io import StringIO  # Python 3.3+
 import uuid
@@ -210,7 +210,7 @@ class Column(object):
         1       Leonie
         2     Francois
         3        Bjorn
-        4    Franti\u0161ek
+        4    Franti\\u0161ek
         5       Helena
         6       Astrid
         7         Daan
@@ -1217,7 +1217,7 @@ class DB(object):
 
     def _apply_handlebars(self, q, data, union=True):
         if (sys.version_info < (3, 0)):
-            q = unicode(q)
+            q = str(q)
         template = self.handlebars.compile(q)
         if isinstance(data, list):
             query = [template(item) for item in data]
@@ -1584,7 +1584,7 @@ class DB(object):
 
         tables = {}
         # generate our Columns, and attach to each table to the table name in dict
-        print cols
+        print(cols)
         for (table_schema, table_name, column_name, data_type) in cols:
             if table_name not in tables:
                 tables[table_name] = []
@@ -1598,8 +1598,8 @@ class DB(object):
             self.cur.execute(cmd)
         except Exception as e:
             print ("Error executing command:")
-            print ("\t '{0}'".format(cmd))
-            print ("Exception: {0}".format(e))
+            print(("\t '{0}'".format(cmd)))
+            print(("Exception: {0}".format(e)))
             self.con.rollback()
 
     def to_redshift(self, name, df, drop_if_exists=False, chunk_size=10000,
@@ -1680,7 +1680,7 @@ class DB(object):
         # see http://docs.aws.amazon.com/redshift/latest/dg/t_splitting-data-files.html
         sys.stderr.write("Transfering {0} to s3 in chunks".format(name))
         len_df = len(df)
-        chunks = range(0, len_df, chunk_size)
+        chunks = list(range(0, len_df, chunk_size))
 
         def upload_chunk(i):
             conn = S3Connection(AWS_ACCESS_KEY, AWS_SECRET_KEY)
